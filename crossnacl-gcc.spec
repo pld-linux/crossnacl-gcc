@@ -162,7 +162,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc gcc/README* gcc/COPYING*
+%doc gcc/README*
 %attr(755,root,root) %{_bindir}/%{target}-cpp
 %attr(755,root,root) %{_bindir}/%{target}-gcc
 %attr(755,root,root) %{_bindir}/%{target}-gcc-%{gcc_ver}
