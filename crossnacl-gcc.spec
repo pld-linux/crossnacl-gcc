@@ -6,7 +6,7 @@
 Summary:	Various compilers (C, C++) for nacl
 Name:		crossnacl-gcc
 Version:	4.4.3
-Release:	3.git%{gitver}
+Release:	4.git%{gitver}
 # Generated from git
 # git clone http://git.chromium.org/native_client/nacl-gcc.git
 # (Checkout ID taken from chromium-15.0.874.106/native_client/tools/REVISIONS)
@@ -29,7 +29,7 @@ BuildRequires:	gmp-devel
 BuildRequires:	mpfr-devel
 BuildRequires:	ppl-pwl-devel
 %if %{without bootstrap}
-BuildRequires:	nacl-newlib
+BuildRequires:	crossnacl-newlib
 %endif
 ExclusiveArch:	%{ix86} %{x8664}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -60,6 +60,18 @@ targets.
 
 %description c++ -l pl.UTF-8
 Ten pakiet dodaje obsługę C++ do kompilatora gcc dla NaCL.
+
+%package objc
+Summary:	NaCL binary utility development utilities - objc
+Summary(pl.UTF-8):	Zestaw narzędzi NaCL - objc
+Group:		Development/Languages
+Requires:	%{name} = %{version}-%{release}
+
+%description objc
+This package contains cross targeted objc compiler.
+
+%description objc -l pl.UTF-8
+Ten pakiet zawiera kompilator objc generujący kod pod Win32.
 
 %prep
 %setup -q -n nacl-gcc-%{version}-git%{?gitver}
@@ -156,7 +168,10 @@ mv $RPM_BUILD_ROOT%{gccnlib}/include-fixed/*.h $RPM_BUILD_ROOT%{gccnlib}/include
 %{__rm} -r $RPM_BUILD_ROOT%{_localedir}
 
 # Don't dupe the system libiberty.a
-#%{__rm} $RPM_BUILD_ROOT%{_libdir}/libiberty.a
+%if %{without bootstrap}
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libiberty.a
+%{__rm} $RPM_BUILD_ROOT%{_prefix}/%{target}/lib*/libiberty.a
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -177,7 +192,8 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %{gccnlib}/*.[ao]
-%{gccnlib}/include
+%dir %{gccnlib}/include
+%{gccnlib}/include/*.h
 
 %dir %{gccnlib}/32
 %{gccnlib}/32/*.[oa]
@@ -204,7 +220,17 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/%{target}-c++
 %attr(755,root,root) %{_bindir}/%{target}-g++
+%attr(755,root,root) %{gcclib}/cc1plus
 %{_prefix}/%{target}/include/c++
-%{_prefix}/%{target}/lib*/
+%dir %{_prefix}/%{target}/lib32
+%dir %{_prefix}/%{target}/lib64
+%{_prefix}/%{target}/lib*/libstdc++.*a
+%{_prefix}/%{target}/lib*/libsupc++.*a
 %{_mandir}/man1/%{target}-g++.*
+
+%files objc
+%defattr(644,root,root,755)
+%attr(755,root,root) %{gcclib}/cc1obj
+%{_prefix}/%{target}/lib*/libobjc.*a
+%{gccnlib}/include/objc
 %endif
