@@ -20,6 +20,7 @@ License:	GPL v3+ and GPL v3+ with exceptions and GPL v2+ with exceptions
 Group:		Development/Languages
 Source0:	nacl-gcc-%{version}-git%{gitver}.tar.bz2
 # Source0-md5:	50e316936d59c7951b91cff8124c0b30
+Source1:	get-source.sh
 URL:		http://sourceware.org/gcc/
 BuildRequires:	cloog-ppl-devel
 BuildRequires:	crossnacl-binutils
