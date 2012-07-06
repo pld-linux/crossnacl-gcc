@@ -24,6 +24,7 @@ URL:		http://sourceware.org/gcc/
 BuildRequires:	cloog-ppl-devel
 BuildRequires:	crossnacl-binutils
 BuildRequires:	elfutils-devel
+BuildRequires:	gmp-c++-devel
 BuildRequires:	gmp-devel
 BuildRequires:	mpfr-devel
 BuildRequires:	ppl-pwl-devel
