@@ -6,7 +6,7 @@
 Summary:	Various compilers (C, C++) for nacl
 Name:		crossnacl-gcc
 Version:	4.4.3
-Release:	0.git%{gitver}
+Release:	1.git%{gitver}
 # Generated from git
 # git clone http://git.chromium.org/native_client/nacl-gcc.git
 # (Checkout ID taken from chromium-15.0.874.106/native_client/tools/REVISIONS)
@@ -139,6 +139,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcc-%{version}
 %attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gccbug
 %attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcov
+%dir %{_prefix}/lib/gcc
 %{_prefix}/lib/gcc/%{gcc_target_platform}/
 %{_libexecdir}/gcc/%{gcc_target_platform}/
 %{_mandir}/man1/%{gcc_target_platform}-cpp.*
