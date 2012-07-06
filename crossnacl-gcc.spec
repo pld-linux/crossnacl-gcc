@@ -1,6 +1,6 @@
 #
 # Conditional build:
-%bcond_with	bootstrap		# build without nacl newlib package
+%bcond_with	bootstrap		# build without nacl newlib package dependency (without c++ package)
 
 %define		gitver	cff9ac88
 Summary:	Various compilers (C, C++) for nacl
@@ -16,7 +16,7 @@ Release:	1.git%{gitver}
 # For gcc version, echo gcc/BASE-VER
 # mv nacl-gcc nacl-gcc-4.4.3-gitcff9ac88
 # tar cfj nacl-gcc-4.4.3-gitcff9ac88.tar.bz2 nacl-gcc-4.4.3-gitcff9ac88
-License:	GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
+License:	GPL v3+ and GPL v3+ with exceptions and GPL v2+ with exceptions
 Group:		Development/Languages
 Source0:	nacl-gcc-%{version}-git%{gitver}.tar.bz2
 # Source0-md5:	5f96c99136882b2b22a5d173890f8026
@@ -37,8 +37,22 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.3.
-You'll need this package in order to compile C code. This provides
-support for nacl targets.
+You'll need this package in order to compile C code.
+
+This provides support for NaCl targets.
+
+%package c++
+Summary:	C++ support for crossnacl-gcc
+Summary(pl.UTF-8):	Obsługa C++ dla crossnacl-gcc
+Group:		Development/Languages
+Requires:	%{name} = %{version}-%{release}
+
+%description c++
+This package adds C++ support to the GNU Compiler Collection for NaCl
+targets.
+
+%description c++ -l pl.UTF-8
+Ten pakiet dodaje obsługę C++ do kompilatora gcc dla NaCL.
 
 %prep
 %setup -q -n nacl-gcc-%{version}-git%{?gitver}
@@ -147,6 +161,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/%{gcc_target_platform}-gcov.*
 
 %if %{without bootstrap}
+%files c++
+%defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/%{gcc_target_platform}-c++
 %attr(755,root,root) %{_bindir}/%{gcc_target_platform}-g++
 %{_prefix}/%{gcc_target_platform}/include/c++
