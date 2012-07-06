@@ -1,0 +1,154 @@
+#
+# Conditional build:
+%bcond_with	bootstrap		# build without nacl newlib package
+
+%define		gitver	cff9ac88
+Summary:	Various compilers (C, C++) for nacl
+Name:		crossnacl-gcc
+Version:	4.4.3
+Release:	0.git%{gitver}
+# Generated from git
+# git clone http://git.chromium.org/native_client/nacl-gcc.git
+# (Checkout ID taken from chromium-15.0.874.106/native_client/tools/REVISIONS)
+# cd nacl-gcc
+# git checkout cff9ac884908ba53ae16149e7c7d19c336aa4895
+# cd ..
+# For gcc version, echo gcc/BASE-VER
+# mv nacl-gcc nacl-gcc-4.4.3-gitcff9ac88
+# tar cfj nacl-gcc-4.4.3-gitcff9ac88.tar.bz2 nacl-gcc-4.4.3-gitcff9ac88
+License:	GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
+Group:		Development/Languages
+Source0:	nacl-gcc-%{version}-git%{gitver}.tar.bz2
+# Source0-md5:	5f96c99136882b2b22a5d173890f8026
+URL:		http://sourceware.org/gcc/
+BuildRequires:	cloog-ppl-devel
+BuildRequires:	crossnacl-binutils
+BuildRequires:	elfutils-devel
+BuildRequires:	gmp-devel
+BuildRequires:	mpfr-devel
+BuildRequires:	ppl-pwl-devel
+%if %{without bootstrap}
+BuildRequires:	nacl-newlib
+%endif
+ExclusiveArch:	%{ix86} %{x8664}
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		gcc_target_platform	x86_64-nacl
+
+%description
+The gcc package contains the GNU Compiler Collection version 4.4.3.
+You'll need this package in order to compile C code. This provides
+support for nacl targets.
+
+%prep
+%setup -q -n nacl-gcc-%{version}-git%{?gitver}
+
+%build
+rm -rf obj-%{gcc_target_platform}
+mkdir obj-%{gcc_target_platform}
+cd obj-%{gcc_target_platform}
+CC=gcc
+OPT_FLAGS=`echo %{rpmcflags}|sed -e 's/\(-Wp,\)\?-D_FORTIFY_SOURCE=[12]//g'`
+OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-m64//g;s/-m32//g;s/-m31//g'`
+%ifarch %{ix86}
+OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=i.86//g'`
+%endif
+OPT_FLAGS=`echo "$OPT_FLAGS" | sed -e 's/[[:blank:]]\+/ /g'`
+case "$OPT_FLAGS" in
+*-fasynchronous-unwind-tables*)
+	%{__sed} -i -e 's/-fno-exceptions /-fno-exceptions -fno-asynchronous-unwind-tables/' \
+	../gcc/Makefile.in
+;;
+esac
+
+GCC_DEFINES="-Dinhibit_libc -D__gthr_posix_h"
+../configure \
+	--prefix=%{_prefix} \
+	--mandir=%{_mandir} \
+	--infodir=%{_infodir} \
+	--libexecdir=%{_libdir} \
+	--enable-checking=release \
+	--with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions \
+	--enable-gnu-unique-object \
+	--disable-decimal-float \
+	--disable-libgomp \
+	--disable-libmudflap \
+	--disable-libssp \
+	--disable-libstdcxx-pch \
+	--disable-shared \
+	--with-ppl --with-cloog \
+	CC="$CC" \
+	CFLAGS="$OPT_FLAGS $GCC_DEFINES" \
+	CXXFLAGS="`echo $OPT_FLAGS | sed 's/ -Wall / /g'`" \
+	XCFLAGS="$OPT_FLAGS" \
+%if %{with bootstrap}
+	--disable-threads \
+	--enable-languages="c" \
+	--without-headers \
+	CFLAGS_FOR_TARGET="-O2 -g" \
+	CXXFLAGS_FOR_TARGET="-O2 -g" \
+%else
+	CFLAGS_FOR_TARGET="-O2 -g -mtls-use-call -I/usr/x86_64-nacl/include/" \
+	CXXFLAGS_FOR_TARGET="-O2 -g -mtls-use-call -I/usr/x86_64-nacl/include/" \
+	--enable-threads=nacl \
+	--enable-languages="c,c++,objc" \
+	--enable-tls \
+	--with-newlib \
+%endif
+	--target=%{gcc_target_platform} \
+	--with-host-libstdcxx="-lpwl -lstdc++ -lm" \
+	--disable-ppl-version-check \
+	--disable-libgcj
+
+%{__make} \
+	BOOT_CFLAGS="$OPT_FLAGS" \
+%if %{with bootstrap}
+	all-gcc all-target-libgcc
+%else
+	all
+%endif
+
+%install
+rm -rf $RPM_BUILD_ROOT
+cd obj-%{gcc_target_platform}
+%{__make} \
+%if %{with bootstrap}
+	install-gcc install-target-libgcc \
+%else
+	install \
+%endif
+	DESTDIR=$RPM_BUILD_ROOT
+
+# Delete supplemental files that would conflict with the core toolchain
+%{__rm} -r $RPM_BUILD_ROOT%{_infodir}
+%{__rm} -r $RPM_BUILD_ROOT%{_mandir}/man7/
+# I suspect that the core toolchain locale files will work with this reasonably well.
+%{__rm} -r $RPM_BUILD_ROOT%{_localedir}/
+
+# Don't dupe the system libiberty.a
+#%{__rm} $RPM_BUILD_ROOT%{_libdir}/libiberty.a
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(644,root,root,755)
+%doc gcc/README* gcc/COPYING*
+%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-cpp
+%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcc
+%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcc-%{version}
+%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gccbug
+%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcov
+%{_prefix}/lib/gcc/%{gcc_target_platform}/
+%{_libexecdir}/gcc/%{gcc_target_platform}/
+%{_mandir}/man1/%{gcc_target_platform}-cpp.*
+%{_mandir}/man1/%{gcc_target_platform}-gcc.*
+%{_mandir}/man1/%{gcc_target_platform}-gcov.*
+
+%if %{without bootstrap}
+%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-c++
+%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-g++
+%{_prefix}/%{gcc_target_platform}/include/c++
+%{_prefix}/%{gcc_target_platform}/lib*/
+%{_mandir}/man1/%{gcc_target_platform}-g++.*
+%endif
