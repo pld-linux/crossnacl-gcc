@@ -172,8 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_prefix}/lib/gcc
 %dir %{_prefix}/lib/gcc/%{target}
 %dir %{gccnlib}
-%{gccnlib}/*.a
-%{gccnlib}/*.o
+%{gccnlib}/*.[ao]
 %{gccnlib}/include
 
 %dir %{gccnlib}/32
@@ -181,6 +180,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %dir %{_libexecdir}
 %dir %{_libexecdir}/gcc
+%dir %{_libexecdir}/gcc/%{target}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
 %attr(755,root,root) %{gcclib}/collect2
