@@ -6,7 +6,7 @@
 Summary:	Various compilers (C, C++) for nacl
 Name:		crossnacl-gcc
 Version:	4.4.3
-Release:	1.git%{gitver}
+Release:	2.git%{gitver}
 # Generated from git
 # git clone http://git.chromium.org/native_client/nacl-gcc.git
 # (Checkout ID taken from chromium-15.0.874.106/native_client/tools/REVISIONS)
@@ -33,7 +33,13 @@ BuildRequires:	nacl-newlib
 ExclusiveArch:	%{ix86} %{x8664}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		gcc_target_platform	x86_64-nacl
+%define		target		x86_64-nacl
+%define		arch		%{_prefix}/%{target}
+%define		gcc_ver		%{version}
+%define		gcclib		%{_libdir}/gcc/%{target}/%{gcc_ver}
+%define		gccnlib		%{_prefix}/lib/gcc/%{target}/%{gcc_ver}
+
+%define		filterout_cpp	-D_FORTIFY_SOURCE=[0-9]+
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.3.
@@ -58,16 +64,17 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla NaCL.
 %setup -q -n nacl-gcc-%{version}-git%{?gitver}
 
 %build
-rm -rf obj-%{gcc_target_platform}
-mkdir obj-%{gcc_target_platform}
-cd obj-%{gcc_target_platform}
-CC=gcc
-OPT_FLAGS=`echo %{rpmcflags}|sed -e 's/\(-Wp,\)\?-D_FORTIFY_SOURCE=[12]//g'`
-OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-m64//g;s/-m32//g;s/-m31//g'`
+rm -rf obj-%{target}
+install -d obj-%{target}
+cd obj-%{target}
+
+OPT_FLAGS="%{rpmcflags}"
+OPT_FLAGS=$(echo "$OPT_FLAGS" | sed -e 's/-m64//g;s/-m32//g;s/-m31//g')
 %ifarch %{ix86}
-OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=i.86//g'`
+OPT_FLAGS=$(echo "$OPT_FLAGS" | sed -e 's/-march=i.86//g')
 %endif
-OPT_FLAGS=`echo "$OPT_FLAGS" | sed -e 's/[[:blank:]]\+/ /g'`
+OPT_FLAGS=$(echo "$OPT_FLAGS" | sed -e 's/[[:blank:]]\+/ /g')
+
 case "$OPT_FLAGS" in
 *-fasynchronous-unwind-tables*)
 	%{__sed} -i -e 's/-fno-exceptions /-fno-exceptions -fno-asynchronous-unwind-tables/' \
@@ -82,7 +89,9 @@ GCC_DEFINES="-Dinhibit_libc -D__gthr_posix_h"
 	--infodir=%{_infodir} \
 	--libexecdir=%{_libdir} \
 	--enable-checking=release \
-	--with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions \
+	--with-system-zlib \
+	--enable-__cxa_atexit \
+	--disable-libunwind-exceptions \
 	--enable-gnu-unique-object \
 	--disable-decimal-float \
 	--disable-libgomp \
@@ -91,9 +100,9 @@ GCC_DEFINES="-Dinhibit_libc -D__gthr_posix_h"
 	--disable-libstdcxx-pch \
 	--disable-shared \
 	--with-ppl --with-cloog \
-	CC="$CC" \
+	CC="%{__cc}" \
 	CFLAGS="$OPT_FLAGS $GCC_DEFINES" \
-	CXXFLAGS="`echo $OPT_FLAGS | sed 's/ -Wall / /g'`" \
+	CXXFLAGS="$(echo $OPT_FLAGS | sed 's/ -Wall / /g')" \
 	XCFLAGS="$OPT_FLAGS" \
 %if %{with bootstrap}
 	--disable-threads \
@@ -109,7 +118,7 @@ GCC_DEFINES="-Dinhibit_libc -D__gthr_posix_h"
 	--enable-tls \
 	--with-newlib \
 %endif
-	--target=%{gcc_target_platform} \
+	--target=%{target} \
 	--with-host-libstdcxx="-lpwl -lstdc++ -lm" \
 	--disable-ppl-version-check \
 	--disable-libgcj
@@ -124,7 +133,7 @@ GCC_DEFINES="-Dinhibit_libc -D__gthr_posix_h"
 
 %install
 rm -rf $RPM_BUILD_ROOT
-cd obj-%{gcc_target_platform}
+cd obj-%{target}
 %{__make} \
 %if %{with bootstrap}
 	install-gcc install-target-libgcc \
@@ -133,11 +142,17 @@ cd obj-%{gcc_target_platform}
 %endif
 	DESTDIR=$RPM_BUILD_ROOT
 
+# move fixed includes to proper place
+mv $RPM_BUILD_ROOT%{gccnlib}/include-fixed/*.h $RPM_BUILD_ROOT%{gccnlib}/include
+
+%{__rm} -r $RPM_BUILD_ROOT%{gccnlib}/include-fixed
+%{__rm} -r $RPM_BUILD_ROOT%{gccnlib}/install-tools
+
 # Delete supplemental files that would conflict with the core toolchain
 %{__rm} -r $RPM_BUILD_ROOT%{_infodir}
-%{__rm} -r $RPM_BUILD_ROOT%{_mandir}/man7/
+%{__rm} -r $RPM_BUILD_ROOT%{_mandir}/man7
 # I suspect that the core toolchain locale files will work with this reasonably well.
-%{__rm} -r $RPM_BUILD_ROOT%{_localedir}/
+%{__rm} -r $RPM_BUILD_ROOT%{_localedir}
 
 # Don't dupe the system libiberty.a
 #%{__rm} $RPM_BUILD_ROOT%{_libdir}/libiberty.a
@@ -148,24 +163,41 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc gcc/README* gcc/COPYING*
-%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-cpp
-%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcc
-%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcc-%{version}
-%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gccbug
-%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-gcov
+%attr(755,root,root) %{_bindir}/%{target}-cpp
+%attr(755,root,root) %{_bindir}/%{target}-gcc
+%attr(755,root,root) %{_bindir}/%{target}-gcc-%{gcc_ver}
+%attr(755,root,root) %{_bindir}/%{target}-gccbug
+%attr(755,root,root) %{_bindir}/%{target}-gcov
+
 %dir %{_prefix}/lib/gcc
-%{_prefix}/lib/gcc/%{gcc_target_platform}/
-%{_libexecdir}/gcc/%{gcc_target_platform}/
-%{_mandir}/man1/%{gcc_target_platform}-cpp.*
-%{_mandir}/man1/%{gcc_target_platform}-gcc.*
-%{_mandir}/man1/%{gcc_target_platform}-gcov.*
+%dir %{_prefix}/lib/gcc/%{target}
+%dir %{gccnlib}
+%{gccnlib}/*.a
+%{gccnlib}/*.o
+%{gccnlib}/include
+
+%dir %{gccnlib}/32
+%{gccnlib}/32/*.[oa]
+
+%dir %{_libexecdir}
+%dir %{_libexecdir}/gcc
+%dir %{gcclib}
+%attr(755,root,root) %{gcclib}/cc1
+%attr(755,root,root) %{gcclib}/collect2
+
+%dir %{gcclib}/install-tools
+%attr(755,root,root) %{gcclib}/install-tools/*
+
+%{_mandir}/man1/%{target}-cpp.*
+%{_mandir}/man1/%{target}-gcc.*
+%{_mandir}/man1/%{target}-gcov.*
 
 %if %{without bootstrap}
 %files c++
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-c++
-%attr(755,root,root) %{_bindir}/%{gcc_target_platform}-g++
-%{_prefix}/%{gcc_target_platform}/include/c++
-%{_prefix}/%{gcc_target_platform}/lib*/
-%{_mandir}/man1/%{gcc_target_platform}-g++.*
+%attr(755,root,root) %{_bindir}/%{target}-c++
+%attr(755,root,root) %{_bindir}/%{target}-g++
+%{_prefix}/%{target}/include/c++
+%{_prefix}/%{target}/lib*/
+%{_mandir}/man1/%{target}-g++.*
 %endif
