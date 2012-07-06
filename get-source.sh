@@ -25,9 +25,6 @@ chrome_branch=$(IFS=.; set -- $chrome_version; echo $3)
 test -e DEPS.py || svn cat http://src.chromium.org/chrome/branches/$chrome_branch/src/DEPS@$chrome_revision > DEPS.py
 nacl_revision=$(awk -F'"' '/nacl_revision.:/{print $4}' DEPS.py)
 
-# nacl_revision taken from src/DEPS of chrome 20.0.1132.47
-nacl_revision=8118
-
 export GIT_DIR=$package/.git
 
 if [ ! -d $package ]; then
