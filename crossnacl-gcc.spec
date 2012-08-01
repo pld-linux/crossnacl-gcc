@@ -1,25 +1,16 @@
 #
 # Conditional build:
-%bcond_with	bootstrap		# build without nacl newlib package dependency (without c++ package)
+%bcond_with	bootstrap		# build without NaCL newlib package dependency (without c++ package)
 
-%define		gitver	c69a5b7
-Summary:	Various compilers (C, C++) for nacl
+%define		gitver	3937565
+Summary:	Various compilers (C, C++) for NaCl
 Name:		crossnacl-gcc
 Version:	4.4.3
-Release:	5.git%{gitver}
-# Generated from git
-# git clone http://git.chromium.org/native_client/nacl-gcc.git
-# (Checkout ID taken from chromium-15.0.874.106/native_client/tools/REVISIONS)
-# cd nacl-gcc
-# git checkout cff9ac884908ba53ae16149e7c7d19c336aa4895
-# cd ..
-# For gcc version, echo gcc/BASE-VER
-# mv nacl-gcc nacl-gcc-4.4.3-gitcff9ac88
-# tar cfj nacl-gcc-4.4.3-gitcff9ac88.tar.bz2 nacl-gcc-4.4.3-gitcff9ac88
+Release:	6.git%{gitver}
 License:	GPL v3+ and GPL v3+ with exceptions and GPL v2+ with exceptions
 Group:		Development/Languages
 Source0:	nacl-gcc-%{version}-git%{gitver}.tar.bz2
-# Source0-md5:	50e316936d59c7951b91cff8124c0b30
+# Source0-md5:	fcdfdd30b82d8ad8fa6e39e7e32cee64
 Source1:	get-source.sh
 URL:		http://sourceware.org/gcc/
 BuildRequires:	cloog-ppl-devel
