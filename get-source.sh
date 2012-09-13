@@ -23,7 +23,7 @@ specfile=crossnacl-gcc.spec
 # fatal: Path 'gcc/BASE-VER' does not exist in 'c69a5b7252d2f073d0f526800e4fca3b63cd1fab'
 depth=5
 
-chrome_channel=stable
+chrome_channel=${1:-stable}
 chrome_version=$(curl -s "$omahaproxy_url/?os=linux&channel=$chrome_channel" | awk -F, 'NR > 1{print $3}')
 test -n "$chrome_version"
 chrome_revision=$(curl -s $omahaproxy_url/revision?version=$chrome_version)
