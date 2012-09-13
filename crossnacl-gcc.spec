@@ -20,6 +20,8 @@ BuildRequires:	gmp-c++-devel
 BuildRequires:	gmp-devel
 BuildRequires:	mpfr-devel
 BuildRequires:	ppl-pwl-devel
+BuildRequires:	tar >= 1:1.22
+BuildRequires:	xz
 %if %{without bootstrap}
 BuildRequires:	crossnacl-newlib
 %endif
