@@ -34,11 +34,11 @@ test -e DEPS.py || svn cat http://src.chromium.org/chrome/branches/$chrome_branc
 nacl_revision=$(awk -F'"' '/nacl_revision.:/{print $4}' DEPS.py)
 test -n "$nacl_revision"
 
-export GIT_DIR=$package/.git
+export GIT_DIR=$package.git
 
-if [ ! -d $package ]; then
-	install -d $package
-	git init
+if [ ! -d $GIT_DIR ]; then
+	install -d $GIT_DIR
+	git init --bare
 	git remote add origin $repo_url
 	git fetch --depth $depth origin refs/heads/master:refs/remotes/origin/master
 else
