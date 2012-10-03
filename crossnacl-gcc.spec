@@ -22,6 +22,7 @@ BuildRequires:	mpfr-devel
 BuildRequires:	ppl-pwl-devel
 BuildRequires:	tar >= 1:1.22
 BuildRequires:	xz
+BuildConflicts:	cloog-isl-devel
 %if %{without bootstrap}
 BuildRequires:	crossnacl-newlib
 %endif
