@@ -2,15 +2,15 @@
 # Conditional build:
 %bcond_with	bootstrap		# build without NaCL newlib package dependency (without c++ package)
 
-%define		gitver	3937565
+%define		gitver	455063d
 Summary:	Various compilers (C, C++) for NaCl
 Name:		crossnacl-gcc
 Version:	4.4.3
 Release:	6.git%{gitver}
 License:	GPL v3+ and GPL v3+ with exceptions and GPL v2+ with exceptions
 Group:		Development/Languages
-Source0:	nacl-gcc-%{version}-git%{gitver}.tar.bz2
-# Source0-md5:	fcdfdd30b82d8ad8fa6e39e7e32cee64
+Source0:	nacl-gcc-%{version}-git%{gitver}.tar.xz
+# Source0-md5:	dd49a8726695a06c7fe9fc531dc6c637
 Source1:	get-source.sh
 URL:		http://sourceware.org/gcc/
 BuildRequires:	cloog-ppl-devel
@@ -35,6 +35,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		gccnlib		%{_prefix}/lib/gcc/%{target}/%{gcc_ver}
 
 %define		filterout_cpp	-D_FORTIFY_SOURCE=[0-9]+
+%define		filterout_c		-Werror=format-security
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.3.
