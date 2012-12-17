@@ -19,7 +19,6 @@ BuildRequires:	elfutils-devel
 BuildRequires:	gmp-c++-devel
 BuildRequires:	gmp-devel
 BuildRequires:	mpfr-devel
-BuildRequires:	ppl-pwl-devel
 BuildRequires:	tar >= 1:1.22
 BuildRequires:	xz
 BuildConflicts:	cloog-isl-devel
@@ -128,7 +127,7 @@ GCC_DEFINES="-Dinhibit_libc -D__gthr_posix_h"
 	--with-newlib \
 %endif
 	--target=%{target} \
-	--with-host-libstdcxx="-lpwl -lstdc++ -lm" \
+	--with-host-libstdcxx="-lstdc++ -lm" \
 	--disable-ppl-version-check \
 	--disable-libgcj
 
