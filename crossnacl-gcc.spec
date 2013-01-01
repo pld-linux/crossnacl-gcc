@@ -6,7 +6,7 @@
 Summary:	Various compilers (C, C++) for NaCl
 Name:		crossnacl-gcc
 Version:	4.4.3
-Release:	8.git%{gitver}
+Release:	9.git%{gitver}
 License:	GPL v3+ and GPL v3+ with exceptions and GPL v2+ with exceptions
 Group:		Development/Languages
 Source0:	nacl-gcc-%{version}-git%{gitver}.tar.xz
@@ -76,7 +76,7 @@ rm -rf obj-%{target}
 install -d obj-%{target}
 cd obj-%{target}
 
-OPT_FLAGS="%{rpmcflags}"
+OPT_FLAGS="%{rpmcflags} -D_FILE_OFFSET_BITS=64"
 OPT_FLAGS=$(echo "$OPT_FLAGS" | sed -e 's/-m64//g;s/-m32//g;s/-m31//g')
 %ifarch %{ix86}
 OPT_FLAGS=$(echo "$OPT_FLAGS" | sed -e 's/-march=i.86//g')
