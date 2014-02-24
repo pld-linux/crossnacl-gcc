@@ -19,6 +19,7 @@ BuildRequires:	elfutils-devel
 BuildRequires:	gmp-c++-devel
 BuildRequires:	gmp-devel
 BuildRequires:	mpfr-devel
+BuildRequires:	perl-tools-pod
 BuildRequires:	tar >= 1:1.22
 BuildRequires:	xz
 BuildConflicts:	cloog-isl-devel
