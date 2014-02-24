@@ -108,6 +108,7 @@ GCC_DEFINES="-Dinhibit_libc -D__gthr_posix_h"
 	--disable-libstdcxx-pch \
 	--disable-shared \
 	--with-ppl --with-cloog \
+	MAKEINFO=/bin/true \
 	CC="%{__cc}" \
 	CFLAGS="$OPT_FLAGS $GCC_DEFINES" \
 	CXXFLAGS="$(echo $OPT_FLAGS | sed 's/ -Wall / /g')" \
