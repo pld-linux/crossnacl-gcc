@@ -6,12 +6,13 @@
 Summary:	Various compilers (C, C++) for NaCl
 Name:		crossnacl-gcc
 Version:	4.4.3
-Release:	11.git%{gitver}
+Release:	12.git%{gitver}
 License:	GPL v3+ and GPL v3+ with exceptions and GPL v2+ with exceptions
 Group:		Development/Languages
 Source0:	nacl-gcc-%{version}-git%{gitver}.tar.xz
 # Source0-md5:	e72fed38d5b93e4505c1a05c69ab0796
 Source1:	get-source.sh
+Patch0:		gnu_inline-mismatch.patch
 URL:		http://sourceware.org/gcc/
 BuildRequires:	cloog-ppl-devel
 BuildRequires:	crossnacl-binutils
@@ -71,13 +72,14 @@ Ten pakiet zawiera kompilator objc generujący kod pod Win32.
 
 %prep
 %setup -q -n nacl-gcc-%{version}-git%{?gitver}
+%patch0 -p1
 
 %build
 rm -rf obj-%{target}
 install -d obj-%{target}
 cd obj-%{target}
 
-OPT_FLAGS="%{rpmcflags} -D_FILE_OFFSET_BITS=64"
+OPT_FLAGS="%{rpmcflags} -D_FILE_OFFSET_BITS=64 -fgnu89-inline"
 OPT_FLAGS=$(echo "$OPT_FLAGS" | sed -e 's/-m64//g;s/-m32//g;s/-m31//g')
 %ifarch %{ix86}
 OPT_FLAGS=$(echo "$OPT_FLAGS" | sed -e 's/-march=i.86//g')
