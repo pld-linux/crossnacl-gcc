@@ -6,7 +6,7 @@
 Summary:	Various compilers (C, C++) for NaCl
 Name:		crossnacl-gcc
 Version:	4.4.3
-Release:	12.git%{gitver}
+Release:	13.git%{gitver}
 License:	GPL v3+ and GPL v3+ with exceptions and GPL v2+ with exceptions
 Group:		Development/Languages
 Source0:	nacl-gcc-%{version}-git%{gitver}.tar.xz
@@ -197,8 +197,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{gccnlib}/32
 %{gccnlib}/32/*.[oa]
 
-%dir %{_libexecdir}
-%dir %{_libexecdir}/gcc
 %dir %{_libexecdir}/gcc/%{target}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
