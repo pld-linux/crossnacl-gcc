@@ -83,7 +83,7 @@ Ten pakiet zawiera kompilator objc generujący kod dla NaCl.
 
 %prep
 %setup -q -n nacl-gcc-%{version}-git%{?gitver}
-%patch0 -p1
+%patch -P0 -p1
 
 %build
 rm -rf obj-%{target}
